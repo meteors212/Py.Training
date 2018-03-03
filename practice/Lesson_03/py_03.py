@@ -2,19 +2,37 @@ def Get_Agile_Data():
     from selenium import webdriver
     import time
     chrome_path = r'C:\selenium\chromedriver.exe'
-    web = webdriver.Chrome(chrome_path)
+    browser = webdriver.Chrome(chrome_path)
 
-    web.get('https://agile.us.dell.com/Agile/default/login-cms.jsp')
-    web.set_window_position(0,0)
-    web.set_window_size(700,700)
+    browser.get('https://agile.us.dell.com/Agile/PLMServlet?module=LoginHandler&opcode=handlePopupBlocker')
     time.sleep(5)
 
-    web.find_element_by_id('j_username').send_keys('yoyo_z_zhang@wistron.com') #set account
-    web.find_element_by_id("j_password").send_keys('Linna2041') #set password
-    web.find_element_by_id("login").click()  # set password
-    time.sleep(5)
+    ## login
+    browser.find_element_by_id('j_username').send_keys('yoyo_z_zhang@wistron.com') #set account
+    browser.find_element_by_id("j_password").send_keys('Linna2041') #set password
+    browser.find_element_by_id("login").click()  # set password
+    time.sleep(10)
 
-    # web.close()
+    print(check_project_exist(browser, "Rocket"))
+    # click search
+
+
+def check_project_exist(browser, prjName):
+    import requests as rq
+    url = r'https://agile.us.dell.com/Agile/PCMServlet?module=AutoCompleteHandler&opcode=completions&ajaxRequest=true&listId=291&classId=277075&refClsId=-1&attrId=2000008066&applyFiltering=false&append$USER=false&uiType=AutoComplete&condition=contains&format=text/plain&search=default&displayInactiveValues=true&query=' + prjName + r'&rnd=1455773506090&invalidate_session=false'
+    jsStr = '''function httpGetSync(url){
+                var xmlHttp = new XMLHttpRequest(); 
+                xmlHttp.onreadystatechange = function() { 
+	                if (xmlHttp.readyState == 4 && xmlHttp.status == 200) 
+	                {
+                        alert(xmlHttp.responseText);
+	                } 
+                };
+                xmlHttp.open('GET', url, false); 
+                xmlHttp.send(null);
+                }'''
+
+    return browser.execute_script(jsStr,url)
 
 def HouseSearching():
     import requests
@@ -32,4 +50,28 @@ def HouseSearching():
     print(df.head())
     #print(df.head())
     #df.to_excel("house_list.xlsx")
-Get_Agile_Data()
+
+def missing_value():
+    import pandas as pd
+    import numpy as np
+    df = pd.DataFrame([['frank','M',np.nan], \
+            ['mary', 'F', np.nan],\
+            ['tom', 'M', 30],\
+            ['jean', 'M', 55],])
+    df.columns = ['name', 'gender', 'age']
+    #print(df['age'].notnull())
+
+    print(df.age.isnull().values.any())
+    print(df.isnull().values.any())
+    print(df.isnull().sum())
+    print(df.isnull().sum().sum())
+    print(df.dropna())
+
+def issue_counter(filepath):
+    import pandas
+    pandas.read_excel(filepath)
+
+
+#missing_value()
+#Get_Agile_Data()
+#check_project_exist('Rocket')
